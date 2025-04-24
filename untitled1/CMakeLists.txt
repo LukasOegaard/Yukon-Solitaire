@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 3.30)
-project(untitled1 C)
+cmake_minimum_required(VERSION 3.16)
+project(yukon C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(untitled1 main.c)
+add_executable(yukon
+        main.c
+        card.c
+        deck.c
+)

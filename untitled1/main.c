@@ -2,6 +2,8 @@
 #include <string.h>
 #include "deck.c"   // midlertidigt for demo
 #include "card.c"
+#include "game.h"
+
 
 int main() {
     Card* deck = NULL;
@@ -54,6 +56,15 @@ int main() {
         else if (strncmp(input, "SD", 2) == 0) {
             char* filename = input + 3;
             save_deck(deck, strlen(filename) > 0 ? filename : "cards.txt");
+        }
+        else if (strcmp(input, "P") == 0) {
+            if (!deck) {
+                printf("Message: No deck loaded.\n");
+                continue;
+            }
+            deal_to_columns(&deck);
+            display_game();
+            printf("Message: OK\n");
         } else {
             printf("Message: Unknown command.\n");
         }

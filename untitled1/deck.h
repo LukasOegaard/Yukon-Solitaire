@@ -1,7 +1,7 @@
 #ifndef DECK_H
 #define DECK_H
 
-#include "card.h"   // <-- Dette mangler!
+#include "card.h"
 
 Card* load_deck(const char* filename);
 void show_deck(Card* deck);

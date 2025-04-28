@@ -1,6 +1,5 @@
 #include "game.h"
 #include <stdio.h>
-#include <stdlib.h>
 
 Pile columns[COLUMN_COUNT];
 Pile foundations[FOUNDATION_COUNT];
@@ -27,11 +26,8 @@ void deal_to_columns(Card** deck) {
             prev = current;
         }
 
-        // Gør nederste kort synligt
         Card* c = columns[i].top;
-        while (c->next) {
-            c = c->next;
-        }
+        while (c && c->next) c = c->next;
         if (c) c->face_up = 1;
     }
 }
@@ -39,7 +35,6 @@ void deal_to_columns(Card** deck) {
 void display_game(void) {
     printf("\nC1\tC2\tC3\tC4\tC5\tC6\tC7\n");
 
-    // Find den højeste kolonne (så vi ved hvor mange rækker vi skal vise)
     int max_height = 0;
     for (int i = 0; i < COLUMN_COUNT; i++) {
         int count = 0;
@@ -53,7 +48,6 @@ void display_game(void) {
         }
     }
 
-    // Print kortene række for række
     for (int row = 0; row < max_height; row++) {
         for (int col = 0; col < COLUMN_COUNT; col++) {
             Card* c = columns[col].top;
@@ -72,9 +66,117 @@ void display_game(void) {
         printf("\n");
     }
 
-    // Vis foundations (bare tomme placeholders for nu)
     for (int i = 0; i < FOUNDATION_COUNT; i++) {
-        printf("[] F%d\t", i + 1);
+        printf("[");
+        if (foundations[i].top) {
+            char* s = card_to_string(foundations[i].top);
+            printf("%s", s);
+            free(s);
+        }
+        printf("] F%d\t", i + 1);
     }
     printf("\n\n");
+}
+
+void clear_columns(void) {
+    for (int i = 0; i < COLUMN_COUNT; i++) {
+        free_deck(columns[i].top);
+        columns[i].top = NULL;
+    }
+    for (int i = 0; i < FOUNDATION_COUNT; i++) {
+        free_deck(foundations[i].top);
+        foundations[i].top = NULL;
+    }
+}
+
+Card* cut_cards_from_column(int src_col, char rank, char suit) {
+    if (src_col < 1 || src_col > COLUMN_COUNT) return NULL;
+
+    Card* current = columns[src_col - 1].top;
+    Card* previous = NULL;
+
+    while (current) {
+        if (current->face_up && current->rank == rank && current->suit == suit) {
+            if (previous) {
+                previous->next = NULL;
+                if (!previous->face_up) {
+                    previous->face_up = 1;
+                }
+            } else {
+                columns[src_col - 1].top = NULL;
+            }
+            return current;
+        }
+        previous = current;
+        current = current->next;
+    }
+
+    return NULL;
+}
+
+void add_cards_to_column(int dst_col, Card* stack) {
+    if (dst_col < 1 || dst_col > COLUMN_COUNT || !stack) return;
+
+    Card* top = columns[dst_col - 1].top;
+
+    if (!top) {
+        columns[dst_col - 1].top = stack;
+    } else {
+        Card* current = top;
+        while (current->next) {
+            current = current->next;
+        }
+        current->next = stack;
+    }
+}
+
+int is_valid_move(Card* moving_card, Card* destination_card) {
+    if (!destination_card) {
+        return rank_to_value(moving_card->rank) == 13;
+    }
+
+    int moving_value = rank_to_value(moving_card->rank);
+    int dest_value = rank_to_value(destination_card->rank);
+
+    int color_different = is_red(moving_card->suit) != is_red(destination_card->suit);
+    int correct_rank = (moving_value + 1 == dest_value);
+
+    return color_different && correct_rank;
+}
+
+int is_valid_foundation_move(Card* moving_card, Card* foundation_top) {
+    if (!moving_card) return 0;
+
+    int moving_value = rank_to_value(moving_card->rank);
+
+    if (!foundation_top) {
+        return (moving_value == 1);
+    }
+
+    int foundation_value = rank_to_value(foundation_top->rank);
+
+    return (moving_value == foundation_value + 1) && (moving_card->suit == foundation_top->suit);
+}
+
+void add_card_to_foundation(int foundation_num, Card* card) {
+    if (foundation_num < 1 || foundation_num > FOUNDATION_COUNT || !card) return;
+
+    card->next = foundations[foundation_num - 1].top;
+    foundations[foundation_num - 1].top = card;
+}
+
+int is_red(Suit suit) {
+    return (suit == HEARTS || suit == DIAMONDS);
+}
+
+int rank_to_value(char rank) {
+    if (rank >= '2' && rank <= '9') return rank - '0';
+    switch (rank) {
+        case 'T': return 10;
+        case 'J': return 11;
+        case 'Q': return 12;
+        case 'K': return 13;
+        case 'A': return 1;
+        default: return 0;
+    }
 }

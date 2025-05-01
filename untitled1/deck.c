@@ -8,54 +8,69 @@ Card* load_deck(const char* filename);
 void show_deck(Card* deck);
 
 // deck.c (implementering)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "card.h"
+
 Card* load_deck(const char* filename) {
-    FILE* f = fopen(filename, "r");
-    if (!f) {
-        printf("Message: File not found.\n");
+    FILE* file = fopen(filename, "r");
+    if (!file) {
         return NULL;
     }
 
     Card* head = NULL;
     Card* tail = NULL;
-    char line[4];
+    char line[10];
 
-    while (fgets(line, sizeof(line), f)) {
-        char rank = line[0];
-        char suit_char = line[1];
-        Suit suit;
-        switch (suit_char) {
-            case 'C': suit = CLUBS; break;
-            case 'D': suit = DIAMONDS; break;
-            case 'H': suit = HEARTS; break;
-            case 'S': suit = SPADES; break;
-            default:
-                printf("Message: Invalid suit '%c'\n", suit_char);
-                fclose(f);
-                free_deck(head);
-                return NULL;
+    while (fgets(line, sizeof(line), file)) {
+        char rank, suit;
+
+        // Fjern newline
+        line[strcspn(line, "\r\n")] = 0;
+
+        if (strlen(line) != 2) {
+            fclose(file);
+            free_deck(head);
+            return NULL;
         }
 
-        Card* c = create_card(rank, suit);
-        if (!head) head = c;
-        else tail->next = c;
-        tail = c;
+        rank = line[0];
+        suit = line[1];
+
+        Card* new_card = create_card(rank, suit);
+        if (!new_card) {
+            fclose(file);
+            free_deck(head);
+            return NULL;
+        }
+
+        if (!head) {
+            head = tail = new_card;
+        } else {
+            tail->next = new_card;
+            tail = new_card;
+        }
     }
 
-    fclose(f);
-    printf("Message: OK\n");
+    fclose(file);
     return head;
 }
 
-void show_deck(Card* deck) {
-    Card* curr = deck;
-    while (curr) {
-        char* str = card_to_string(curr);
+
+void show_deck(Card* head) {
+    Card* current = head;
+
+    while (current) {
+        char* str = card_to_string(current);  // viser altid kort, uanset face_up
         printf("%s ", str);
         free(str);
-        curr = curr->next;
+        current = current->next;
     }
+
     printf("\n");
 }
+
 
 #include <time.h> // til random
 #include <stdlib.h>

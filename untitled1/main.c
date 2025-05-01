@@ -23,6 +23,12 @@ int main() {
         if (strncmp(input, "LD", 2) == 0) {
             char* filename = input + 3;
             deck = load_deck(strlen(filename) > 0 ? filename : "cards.txt");
+
+            if (deck) {
+                printf("Message: OK\n");
+            } else {
+                printf("Message: Cannot load deck.\n");
+            }
         } else if (strcmp(input, "SW") == 0) {
             if (deck) {
                 show_deck(deck);

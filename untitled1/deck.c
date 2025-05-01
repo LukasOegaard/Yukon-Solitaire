@@ -58,19 +58,9 @@ Card* load_deck(const char* filename) {
 }
 
 
-void show_deck(Card* head) {
-    Card* current = head;
-
-    while (current) {
-        char* str = card_to_string(current);  // viser altid kort, uanset face_up
-        printf("%s ", str);
-        free(str);
-        current = current->next;
-    }
-
-    printf("\n");
-}
-
+#include <stdio.h>
+#include "deck.h"
+#include "card.h"
 
 #include <time.h> // til random
 #include <stdlib.h>
@@ -150,10 +140,20 @@ void save_deck(Card* head, const char* filename) {
 
     Card* curr = head;
     while (curr) {
-        fprintf(f, "%c%s\n", curr->rank, suit_to_string(curr->suit));
+        fprintf(f, "%c%s\n", curr->rank, suit_to_char(curr->suit));
         curr = curr->next;
     }
 
     fclose(f);
     printf("Message: OK (deck saved)\n");
+}
+
+void show_deck(Card* head) {
+    Card* current = head;
+    while (current) {
+
+        printf("%c%c ", current->rank, suit_to_char(current->suit));
+        current = current->next;
+    }
+    printf("\n");
 }

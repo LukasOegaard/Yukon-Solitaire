@@ -1,15 +1,27 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "card.h"
 
-Card* create_card(char rank, Suit suit) {
-    Card* c = malloc(sizeof(Card));
-    c->rank = rank;
-    c->suit = suit;
-    c->face_up = 0;
-    c->next = NULL;
-    return c;
+Card* create_card(char rank, Suit suit_char) {
+    Suit suit;
+
+    switch (suit_char) {
+        case 'H': suit = HEARTS; break;
+        case 'D': suit = DIAMONDS; break;
+        case 'C': suit = CLUBS; break;
+        case 'S': suit = SPADES; break;
+        default: return NULL;  // ugyldig suit
+    }
+
+    Card* card = malloc(sizeof(Card));
+    if (!card) return NULL;
+
+    card->rank = rank;
+    card->suit = suit;
+    card->face_up = 0;
+    card->next = NULL;
+    return card;
 }
 
 void free_deck(Card* head) {
@@ -20,22 +32,34 @@ void free_deck(Card* head) {
     }
 }
 
-const char* suit_to_string(Suit suit) {
+char suit_to_char(Suit suit) {
     switch (suit) {
-        case CLUBS: return "C";
-        case DIAMONDS: return "D";
-        case HEARTS: return "H";
-        case SPADES: return "S";
-        default: return "?";
+        case HEARTS: return 'H';
+        case DIAMONDS: return 'D';
+        case CLUBS: return 'C';
+        case SPADES: return 'S';
+        default: return '?';
     }
 }
 
+// Bruges til tableau/bordvisning – skjuler kort der er face_down
 char* card_to_string(Card* card) {
-    char* buf = malloc(4);
-    if (!card->face_up) {
-        strcpy(buf, "[ ]");
+    char* str = malloc(4);
+    if (!card || !card->face_up) {
+        strcpy(str, "[]");
     } else {
-        snprintf(buf, 4, "%c%s", card->rank, suit_to_string(card->suit));
+        snprintf(str, 4, "%c%c", card->rank, suit_to_char(card->suit));
     }
-    return buf;
+    return str;
+}
+
+// Bruges i show_deck() – viser ALLE kort uanset face_up
+char* card_to_string_always(Card* card) {
+    char* str = malloc(4);
+    if (!card) {
+        strcpy(str, "[]");
+    } else {
+        snprintf(str, 4, "%c%c", card->rank, suit_to_char(card->suit));
+    }
+    return str;
 }

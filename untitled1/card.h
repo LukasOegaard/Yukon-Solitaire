@@ -35,6 +35,7 @@ extern Pile foundations[FOUNDATION_COUNT];
 
 void deal_to_columns(Card** deck);
 void display_game();
+char suit_to_char(Suit suit);
 
 #endif
 

@@ -5,19 +5,23 @@ Pile columns[COLUMN_COUNT];
 Pile foundations[FOUNDATION_COUNT];
 
 void deal_to_columns(Card** deck) {
-    int layout[COLUMN_COUNT] = {1, 6, 7, 8, 9, 10, 11};
+    int layout[] = {1, 6, 7, 8, 9, 10, 11};  // antal kort per kolonne
 
     for (int i = 0; i < COLUMN_COUNT; i++) {
+        columns[i].top = NULL;
         Card* prev = NULL;
 
         for (int j = 0; j < layout[i]; j++) {
-            if (*deck == NULL) return;
+            if (!*deck) return;
 
             Card* current = *deck;
             *deck = current->next;
             current->next = NULL;
 
-            if (prev == NULL) {
+            // Alle kort er face down indtil sidste
+            current->face_up = (j == layout[i] - 1) ? 1 : 0;
+
+            if (!columns[i].top) {
                 columns[i].top = current;
             } else {
                 prev->next = current;
@@ -25,27 +29,22 @@ void deal_to_columns(Card** deck) {
 
             prev = current;
         }
-
-        Card* c = columns[i].top;
-        while (c && c->next) c = c->next;
-        if (c) c->face_up = 1;
     }
 }
+
 
 void display_game(void) {
     printf("\nC1\tC2\tC3\tC4\tC5\tC6\tC7\n");
 
     int max_height = 0;
     for (int i = 0; i < COLUMN_COUNT; i++) {
-        int count = 0;
+        int h = 0;
         Card* c = columns[i].top;
         while (c) {
-            count++;
+            h++;
             c = c->next;
         }
-        if (count > max_height) {
-            max_height = count;
-        }
+        if (h > max_height) max_height = h;
     }
 
     for (int row = 0; row < max_height; row++) {
@@ -56,9 +55,9 @@ void display_game(void) {
             }
 
             if (c) {
-                char* s = card_to_string(c);
-                printf("%s\t", s);
-                free(s);
+                char* str = card_to_string(c);
+                printf("%s\t", str);
+                free(str);
             } else {
                 printf("\t");
             }
@@ -66,17 +65,9 @@ void display_game(void) {
         printf("\n");
     }
 
-    for (int i = 0; i < FOUNDATION_COUNT; i++) {
-        printf("[");
-        if (foundations[i].top) {
-            char* s = card_to_string(foundations[i].top);
-            printf("%s", s);
-            free(s);
-        }
-        printf("] F%d\t", i + 1);
-    }
-    printf("\n\n");
+    printf("\n");
 }
+
 
 void clear_columns(void) {
     for (int i = 0; i < COLUMN_COUNT; i++) {

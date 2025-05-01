@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include "deck.h"
 #include "game.h"
+#include "game.h"
 
 int play_mode = 0;
 

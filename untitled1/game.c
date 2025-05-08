@@ -5,24 +5,25 @@ Pile columns[COLUMN_COUNT];
 Pile foundations[FOUNDATION_COUNT];
 
 void deal_to_columns(Card** deck) {
-    int layout[] = {1, 6, 7, 8, 9, 10, 11};  // antal kort per kolonne
+    int layout[] = {1, 6, 7, 8, 9, 10, 11};
 
-    for (int i = 0; i < COLUMN_COUNT; i++) {
-        columns[i].top = NULL;
+    for (int col = 0; col < COLUMN_COUNT; col++) {
         Card* prev = NULL;
+        columns[col].top = NULL;
 
-        for (int j = 0; j < layout[i]; j++) {
+        for (int i = 0; i < layout[col]; i++) {
             if (!*deck) return;
 
             Card* current = *deck;
             *deck = current->next;
             current->next = NULL;
 
-            // Alle kort er face down indtil sidste
-            current->face_up = (j == layout[i] - 1) ? 1 : 0;
+            // De sidste 5 kort skal være face_up
+            int visible_start = layout[col] - 5;
+            current->face_up = (i >= visible_start) ? 1 : 0;
 
-            if (!columns[i].top) {
-                columns[i].top = current;
+            if (!columns[col].top) {
+                columns[col].top = current;
             } else {
                 prev->next = current;
             }
@@ -31,6 +32,7 @@ void deal_to_columns(Card** deck) {
         }
     }
 }
+
 
 
 void display_game(void) {

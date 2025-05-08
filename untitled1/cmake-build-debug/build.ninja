@@ -49,12 +49,6 @@ cmake_ninja_workdir = C$:/Users/lukas/CLionProjects/Yukon-Solitaire1/untitled1/c
 
 build cmake_object_order_depends_target_yukon: phony || .
 
-build CMakeFiles/yukon.dir/main.c.obj: C_COMPILER__yukon_unscanned_Debug C$:/Users/lukas/CLionProjects/Yukon-Solitaire1/untitled1/main.c || cmake_object_order_depends_target_yukon
-  DEP_FILE = CMakeFiles\yukon.dir\main.c.obj.d
-  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\yukon.dir
-  OBJECT_FILE_DIR = CMakeFiles\yukon.dir
-
 build CMakeFiles/yukon.dir/card.c.obj: C_COMPILER__yukon_unscanned_Debug C$:/Users/lukas/CLionProjects/Yukon-Solitaire1/untitled1/card.c || cmake_object_order_depends_target_yukon
   DEP_FILE = CMakeFiles\yukon.dir\card.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always
@@ -73,6 +67,12 @@ build CMakeFiles/yukon.dir/game.c.obj: C_COMPILER__yukon_unscanned_Debug C$:/Use
   OBJECT_DIR = CMakeFiles\yukon.dir
   OBJECT_FILE_DIR = CMakeFiles\yukon.dir
 
+build CMakeFiles/yukon.dir/main.c.obj: C_COMPILER__yukon_unscanned_Debug C$:/Users/lukas/CLionProjects/Yukon-Solitaire1/untitled1/main.c || cmake_object_order_depends_target_yukon
+  DEP_FILE = CMakeFiles\yukon.dir\main.c.obj.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\yukon.dir
+  OBJECT_FILE_DIR = CMakeFiles\yukon.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target yukon
@@ -81,7 +81,7 @@ build CMakeFiles/yukon.dir/game.c.obj: C_COMPILER__yukon_unscanned_Debug C$:/Use
 #############################################
 # Link the executable yukon.exe
 
-build yukon.exe: C_EXECUTABLE_LINKER__yukon_Debug CMakeFiles/yukon.dir/main.c.obj CMakeFiles/yukon.dir/card.c.obj CMakeFiles/yukon.dir/deck.c.obj CMakeFiles/yukon.dir/game.c.obj
+build yukon.exe: C_EXECUTABLE_LINKER__yukon_Debug CMakeFiles/yukon.dir/card.c.obj CMakeFiles/yukon.dir/deck.c.obj CMakeFiles/yukon.dir/game.c.obj CMakeFiles/yukon.dir/main.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\yukon.dir

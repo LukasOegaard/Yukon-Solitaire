@@ -42,7 +42,7 @@ char suit_to_char(Suit suit) {
     }
 }
 
-// Bruges til tableau/bordvisning – skjuler kort der er face_down
+// Bruges til table/bordvisning – skjuler kort der er face_down
 char* card_to_string(Card* card) {
     char* str = malloc(4);
     if (!card || !card->face_up) {

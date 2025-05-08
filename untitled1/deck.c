@@ -148,12 +148,68 @@ void save_deck(Card* head, const char* filename) {
     printf("Message: OK (deck saved)\n");
 }
 
-void show_deck(Card* head) {
-    Card* current = head;
-    while (current) {
+#include <stdio.h>
+#include <stdlib.h>
+#include "deck.h"
+#include "card.h"
 
-        printf("%c%c ", current->rank, suit_to_char(current->suit));
-        current = current->next;
+void show_deck(Card* head) {
+    // Midlertidigt fordel deck i 7 kolonner
+    Card* columns[7] = {NULL};
+    Card* column_tails[7] = {NULL};
+    int layout[7] = {1, 6, 7, 8, 9, 10, 11};
+
+    for (int col = 0; col < 7; col++) {
+        for (int i = 0; i < layout[col]; i++) {
+            if (!head) break;
+
+            Card* temp = head;
+            head = head->next;
+            temp->next = NULL;
+            temp->face_up = 1;  // 👈 vis altid kortet!
+
+            if (!columns[col]) {
+                columns[col] = column_tails[col] = temp;
+            } else {
+                column_tails[col]->next = temp;
+                column_tails[col] = temp;
+            }
+        }
     }
+
+    // Udskriv kolonneoverskrifter
+    printf("\nC1\tC2\tC3\tC4\tC5\tC6\tC7\n");
+
+    // Find største højde
+    int max_height = 0;
+    for (int i = 0; i < 7; i++) {
+        int count = 0;
+        Card* c = columns[i];
+        while (c) {
+            count++;
+            c = c->next;
+        }
+        if (count > max_height) max_height = count;
+    }
+
+    // Udskriv række for række
+    for (int row = 0; row < max_height; row++) {
+        for (int col = 0; col < 7; col++) {
+            Card* c = columns[col];
+            for (int i = 0; i < row && c; i++) {
+                c = c->next;
+            }
+
+            if (c) {
+                char* s = card_to_string(c);  // viser AH, 3C osv.
+                printf("%s\t", s);
+                free(s);
+            } else {
+                printf("\t");
+            }
+        }
+        printf("\n");
+    }
+
     printf("\n");
 }

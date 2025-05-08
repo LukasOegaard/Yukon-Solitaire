@@ -1,143 +1,159 @@
-// ==== card.h ====
-#ifndef CARD_H
-#define CARD_H
-
-typedef enum { CLUBS, DIAMONDS, HEARTS, SPADES } Suit;
-
-typedef struct Card {
-    char rank;
-    Suit suit;
-    int face_up;
-    struct Card* next;
-} Card;
-
-Card* create_card(char rank, Suit suit);
-void free_deck(Card* head);
-const char* suit_to_string(Suit suit);
-char* card_to_string(Card* card);
-char suit_to_char(Suit suit);
-
-#endif
-
-
-// ==== deck.h ====
-#ifndef DECK_H
-#define DECK_H
-
+// deck.c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "card.h"
 
 Card* load_deck(const char* filename);
 void show_deck(Card* deck);
-void interleave_shuffle(Card** head, int split);
-void random_shuffle(Card** head);
-void save_deck(Card* head, const char* filename);
 
-#endif
-
-
-// ==== deck.c ====
+// deck.c (implementering)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "deck.h"
 #include "card.h"
 
 Card* load_deck(const char* filename) {
     FILE* file = fopen(filename, "r");
     if (!file) {
-        printf("Message: File not found.\n");
         return NULL;
     }
 
-    char line[10];
-    int count = 0;
     Card* head = NULL;
     Card* tail = NULL;
+    char line[10];
 
     while (fgets(line, sizeof(line), file)) {
-        if (strlen(line) < 2) continue;
-        char rank = line[0];
-        char suit_char = line[1];
-        Suit suit;
+        char rank, suit;
 
-        switch (suit_char) {
-            case 'C': suit = CLUBS; break;
-            case 'D': suit = DIAMONDS; break;
-            case 'H': suit = HEARTS; break;
-            case 'S': suit = SPADES; break;
-            default:
-                printf("Message: Invalid suit '%c'.\n", suit_char);
-                fclose(file);
-                free_deck(head);
-                return NULL;
-        }
+        // Fjern newline
+        line[strcspn(line, "\r\n")] = 0;
 
-        Card* card = create_card(rank, suit);
-        if (!card) {
+        if (strlen(line) != 2) {
             fclose(file);
             free_deck(head);
             return NULL;
         }
 
-        if (!head) head = card;
-        else tail->next = card;
-        tail = card;
-        count++;
+        rank = line[0];
+        suit = line[1];
+
+        Card* new_card = create_card(rank, suit);
+        if (!new_card) {
+            fclose(file);
+            free_deck(head);
+            return NULL;
+        }
+
+        if (!head) {
+            head = tail = new_card;
+        } else {
+            tail->next = new_card;
+            tail = new_card;
+        }
     }
 
     fclose(file);
-
-    if (count != 52) {
-        printf("Message: Invalid number of cards (%d). Must be 52.\n", count);
-        free_deck(head);
-        return NULL;
-    }
-
     return head;
 }
 
-void show_deck(Card* deck) {
-    printf("C1\tC2\tC3\tC4\tC5\tC6\tC7\n");
-    Card* current = deck;
-    int col = 0;
 
-    while (current) {
-        for (int i = 0; i < 7; i++) {
-            if (current) {
-                current->face_up = 1;
-                char* s = card_to_string(current);
-                printf("%s\t", s);
-                free(s);
-                current = current->next;
-            } else {
-                printf("\t");
-            }
-        }
-        printf("\n");
-    }
-}
+#include <stdio.h>
+#include "deck.h"
+#include "card.h"
+
+#include <time.h> // til random
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include "card.h"
 
 void interleave_shuffle(Card** head, int split) {
-    printf("Message: Interleave shuffle not yet implemented.\n");
+    if (!head || !*head) return;
+
+    Card* left = *head;
+    Card* right = NULL;
+    Card* temp = left;
+
+    for (int i = 1; i < split && temp->next; i++) {
+        temp = temp->next;
+    }
+
+    right = temp->next;
+    temp->next = NULL;
+
+    Card* new_head = NULL;
+    Card** tail = &new_head;
+
+    while (left || right) {
+        if (left) {
+            *tail = left;
+            tail = &left->next;
+            left = left->next;
+        }
+        if (right) {
+            *tail = right;
+            tail = &right->next;
+            right = right->next;
+        }
+    }
+
+    *tail = NULL;
+    *head = new_head;
 }
 
 void random_shuffle(Card** head) {
-    printf("Message: Random shuffle not yet implemented.\n");
+    if (!head || !*head) return;
+
+    // 1. Kopier kort til array for let adgang
+    Card* array[52];
+    int count = 0;
+    Card* curr = *head;
+    while (curr && count < 52) {
+        array[count++] = curr;
+        curr = curr->next;
+    }
+
+    // 2. Fisher-Yates shuffle
+    srand(time(NULL));
+    for (int i = count - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        Card* tmp = array[i];
+        array[i] = array[j];
+        array[j] = tmp;
+    }
+
+    // 3. Genskab linked list
+    for (int i = 0; i < count - 1; i++) {
+        array[i]->next = array[i + 1];
+    }
+    array[count - 1]->next = NULL;
+    *head = array[0];
 }
 
 void save_deck(Card* head, const char* filename) {
-    FILE* file = fopen(filename, "w");
-    if (!file) {
-        printf("Message: Could not open file to save.\n");
+    FILE* f = fopen(filename ? filename : "cards.txt", "w");
+    if (!f) {
+        printf("Message: Could not open file for writing.\n");
         return;
     }
 
-    Card* current = head;
-    while (current) {
-        fprintf(file, "%c%c\n", current->rank, suit_to_char(current->suit));
-        current = current->next;
+    Card* curr = head;
+    while (curr) {
+        fprintf(f, "%c%s\n", curr->rank, suit_to_char(curr->suit));
+        curr = curr->next;
     }
 
-    fclose(file);
-    printf("Message: Deck saved to %s.\n", filename);
+    fclose(f);
+    printf("Message: OK (deck saved)\n");
+}
+
+void show_deck(Card* head) {
+    Card* current = head;
+    while (current) {
+
+        printf("%c%c ", current->rank, suit_to_char(current->suit));
+        current = current->next;
+    }
+    printf("\n");
 }
